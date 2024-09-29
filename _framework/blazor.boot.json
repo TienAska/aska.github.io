@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "TienYoung_blazorwsam",
   "resources": {
-    "hash": "sha256-fWWvCXjIidl4yLfsVaJXPLUHziC1T2SB+yWFkn87QnA=",
+    "hash": "sha256-ehJn+E0Vb2nQZECqRZShfd+e6XoYGlh7qx+p17OK/kw=",
     "jsModuleNative": {
       "dotnet.native.8.0.8.m81y1w9iz8.js": "sha256-juC5sA7gHTLXFEhAKgdM2/RavswpwCtDfjYGsAz2FXg="
     },
@@ -48,7 +48,7 @@
       "System.Text.Encodings.Web.wasm": "sha256-MCv+5sGwYGikJ8D76raGF6L+02exyJcFgx2sVlUjmKk=",
       "System.Text.Json.wasm": "sha256-06a/d+2j+pqKjp9lLbyGYATd8HXETVninZtFk3HGSHE=",
       "System.Text.RegularExpressions.wasm": "sha256-8bujMNUMCuxn48zxE7AA6YYcbZJjv76LHEAtNjS6TuE=",
-      "TienYoung_blazorwsam.wasm": "sha256-ckjWB6BacBSjxiJ3k9HZKbEGcQE+pBMKXQSw4/C7fds="
+      "TienYoung_blazorwsam.wasm": "sha256-VVA8ZNY7Lkb4Osdw72bDyU1lLzdnqMoHBgDLvjM5BaA="
     }
   },
   "cacheBootResources": true,
