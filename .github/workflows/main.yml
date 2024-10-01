@@ -35,7 +35,7 @@ jobs:
         uses: na1307/blazor-github-pages@v2
         id: prepare
         with:
-          project-path: tienyoung.github.io/tienyoung.github.io.csproj
+          project-path: tienyoung.github.io.csproj
           main-repo: true
       - name: Setup Pages
         uses: actions/configure-pages@v5
