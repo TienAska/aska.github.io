@@ -36,16 +36,14 @@ jobs:
         id: prepare
         with:
           project-path: tienyoung.github.io.csproj
-          main-repo: true
+          main-repo: false
+          fix-404: true
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ${{ steps.prepare.outputs.wwwroot-path }}
-      # copy index.html to 404.html to serve the same file when a file is not found
-      - name: copy index.html to 404.html
-        run: cp release/wwwroot/index.html release/wwwroot/404.html
         
   # Deployment job
   deploy:
