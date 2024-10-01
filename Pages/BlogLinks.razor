@@ -1,0 +1,31 @@
+@page "/bloglinks"
+
+<h1>Welcome to My Blog</h1>
+
+<h2>Latest Blog Posts</h2>
+
+<ul>
+    @foreach (var post in blogPosts)
+    {
+        <li>
+            <a href="@post.Url">@post.Title</a>
+            <span>- @post.Date.ToShortDateString()</span>
+        </li>
+    }
+</ul>
+
+@code {
+    private List<BlogPost> blogPosts = new List<BlogPost>
+    {
+        new BlogPost { Title = "Exploring Unity Render Feature", Url = "/blog/exploring_unity_render_feature/exploring_unity_render_feature.html", Date = new DateTime(2020, 06, 06) },
+        new BlogPost { Title = "GPU Skinned Fur Instance in Unity", Url = "/blog/gpu_skinned_fur_instance_in_unity/gpu_skinned_fur_instance_in_unity.html", Date = new DateTime(2021, 12, 16) },
+        // Add more blog posts here
+    };
+
+    private class BlogPost
+    {
+        public string? Title { get; set; }
+        public string? Url { get; set; }
+        public DateTime Date { get; set; }
+    }
+}

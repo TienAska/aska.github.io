@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU Skinned Fur Instance in Unity</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1,
+        h2 {
+            color: #333;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        blockquote {
+            background-color: #f9f9f9;
+            border-left: 3px solid #ccc;
+            margin: 1.5em 10px;
+            padding: 0.5em 10px;
+        }
+
+        figure {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        figcaption {
+            margin-top: 10px;
+            font-style: italic;
+            color: #666;
+        }
+
+        .reference {
+            font-size: 0.8em;
+            vertical-align: super;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>GPU Skinned Fur Instance in Unity</h1>
+
+    <h2>Introduction:</h2>
+    <p>As we all know, the most common method for fur simulation is Shell Based Fur. Simply put, it expands vertices
+        along
+        the normal direction to form stacked shells, and then uses a Noise texture as a fur pattern to create the fur
+        shape
+        through hollowing (Clip or Blend). The basic principles and shading methods have been widely discussed on the
+        internet, so we won't go into detail here. The focus of this article is to introduce a GPU Instance
+        implementation
+        that supports Skinned Mesh in Unity.</p>
+
+    <h2>Limitations:</h2>
+    <p>The most significant problem with Shell Based fur is the exponential increase in the number of faces. On desktop
+        platforms, a decent animal fur effect usually uses the Alpha Clip method, requiring at least 100 layers to avoid
+        discontinuities. This is completely unrealistic on mobile platforms, where 8-16 layers are more reasonable.
+        However,
+        this leads to discontinuities, so Alpha Blend must be used, which also avoids breaking Early Z optimization.</p>
+
+    <p>Another issue is how to draw the Shell. The desktop method is to pre-generate, with controllable thickness and
+        growth
+        direction. This information, along with the number of layers, is written into VertexColor or UV, and drawn in
+        one
+        pass. The mobile approach uses multiple passes. Pre-generation is always an extra step for artists, and even if
+        it
+        can be automated through tools, brushing additional information like growth direction is troublesome. With fewer
+        layers, the actual effect is not very noticeable, and the file size increases exponentially, so it's completely
+        unnecessary. Moreover, URP doesn't support multiple passes by default, so you either need to use multiple
+        material
+        balls to implement multiple passes or extend the pipeline with RenderFeature, both of which are quite
+        cumbersome.
+    </p>
+
+    <h2>Solution:</h2>
+    <p>With high face count, multiple passes, and repeated drawing, this is clearly a case where GPU Instance can be
+        used
+        for optimization. Obtain the Mesh of the fur model, write the number of layers into the Material Block, and <a
+            href="#ref1" class="reference">use
+            DrawMeshInstanced for drawing</a>. However, Unity's skinned mesh renderer doesn't support GPU Instance.
+        Although
+        there are some workarounds, such as BakeMesh or <a href="#ref2" class="reference">Animation
+            Instancing</a>, they each have their own issues.</p>
+
+    <p><a href="#ref3" class="reference">Unity added
+            SkinnedMeshRenderer.GetVertexBuffer in 2021.2.0</a>, which perfectly solves the long-standing SkinnedMesh
+        Instance problem. Therefore, the process is to get the VertexBuffer and set it to the Material, draw using
+        DrawProcedual, and SV_InstanceID represents the current layer number.</p>
+
+    <h2>Implementation:</h2>
+    <p>This solution uses Unity 2021.2.6f1.</p>
+
+    <p>First, use GetVertexBuffer() to get the vertex Buffer after skinning. Note that only position, normal, and
+        tangent
+        attributes are obtained here. UV and Index need to be obtained from the mesh.</p>
+
+    <blockquote>
+        <p>For a mesh to be compatible with a <a
+                href="https://docs.unity3d.com/2022.1/Documentation/ScriptReference/SkinnedMeshRenderer.html">SkinnedMeshRenderer</a>,
+            it must have multiple vertex streams: one for deformed data (positions, normals, tangents), one for static
+            data
+            (colors and texture coordinates), and one for skinning data (blend weights and blend indices).</p>
+    </blockquote>
+
+    <p>Set the Buffer to the material.</p>
+
+    <img src="Untitled.png" alt="Setting Buffer to material">
+
+    <p>Then, perform the drawing. For ease of control, I wrote the number of layers into the Material, which needs to be
+        read out here as the number of Instances.</p>
+
+    <img src="Untitled%201.png" alt="Drawing process">
+
+    <p>Finally, for the Shader part, because we're using Procedural drawing, we can only read vertices from the Buffer
+        using
+        SV_VertexID and SV_InstanceID. Note that the Buffer here can only be ByteAddressBuffer, so we need to manually
+        <a href="#ref4" class="reference">parse</a> it.
+    </p>
+
+    <blockquote>
+        <p>DirectX 11 does not allow <a
+                href="https://docs.unity3d.com/2022.1/Documentation/ScriptReference/GraphicsBuffer.Index.html">Index</a>
+            or
+            ::Vertex buffers to also be <a
+                href="https://docs.unity3d.com/2022.1/Documentation/ScriptReference/GraphicsBuffer.Structured.html">Structured</a>.
+            For compute shader mesh data access with DirectX 11 compatibility, use <a
+                href="https://docs.unity3d.com/2022.1/Documentation/ScriptReference/GraphicsBuffer.Raw.html">Raw</a>.
+        </p>
+    </blockquote>
+
+    <img src="Untitled%202.png" alt="Shader part">
+
+    <p>Note: Because we're using Procedural drawing, we don't need to enable #pragma multi_compile_instancing.
+        Therefore,
+        UNITY_ANY_INSTANCING_ENABLED is undefined, and there's no need to use macros from UnityInstancing.</p>
+
+    <h2>Result:</h2>
+    <video width="100%" controls>
+        <source src="demo.mp4" type="mp4">
+    </video>
+
+    <p>Finally, Shell Fur Shading with any number of layers can be achieved with a single Pass. There's no need to
+        pre-generate meshes, the number of layers can be adjusted dynamically, and it supports Skinned Mesh GPU
+        Instance.
+        All of this requires only one DrawCall.</p>
+
+    <h2>Extension:</h2>
+    <p>Since we're getting the vertex buffer after skinning, in addition to Animation Instance, we can also blend <a
+            href="https://www.youtube.com/watch?v=IDRDA-Q8LuY">skinned animations</a>.</p>
+
+    <p><a href="https://docs.unity3d.com/2022.1/Documentation/ScriptReference/SkinnedMeshRenderer.html">2021.2.0</a> not
+        only provides the vertex cache after skinning but also provides the cache from the previous frame.</p>
+
+    <img src="Untitled%204.png" alt="Previous frame cache">
+
+    <p>Based on this, we can simulate the physical effects of fur in CS. Through DrawProceduralIndirect, we can also set
+        the
+        number of layers based on distance, achieving automatic LOD.</p>
+
+    <h2>References:</h2>
+    <ul>
+        <li id="ref1"><a
+                href="http://walkingfat.com/bump-noise-cloud-3d%e5%99%aa%e7%82%b9gpu-instancing%e5%88%b6%e4%bd%9c%e5%9f%ba%e4%ba%8e%e6%a8%a1%e5%9e%8b%e7%9a%84%e4%bd%93%e7%a7%af%e4%ba%91/">Bump
+                Noise Cloud - 3D噪点+GPU instancing制作基于模型的体积云</a></li>
+        <li id="ref2"><a href="https://zhuanlan.zhihu.com/p/36896547">Render- Animation Instancing</a></li>
+        <li id="ref3"><a
+                href="https://unity3d.com/unity/whats-new/2021.2.0#:~:text=between%20color%20spaces.-,Graphics,-%3A%20You%20can%20now">Unity
+                2021.2.0 - Unity</a></li>
+        <li id="ref4"><a
+                href="https://github.com/cinight/MinimalCompute/blob/master/Assets/SkinnedMeshBuffer/SkinnedMeshBuffer.shader">MinimalCompute/SkinnedMeshBuffer.shader
+                at master · cinight/MinimalCompute</a></li>
+    </ul>
+</body>
+
+</html>
