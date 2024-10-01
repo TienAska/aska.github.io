@@ -36,7 +36,7 @@ jobs:
         id: prepare
         with:
           project-path: tienyoung.github.io.csproj
-          main-repo: false
+          main-repo: true
           fix-404: true
       - name: Setup Pages
         uses: actions/configure-pages@v5
