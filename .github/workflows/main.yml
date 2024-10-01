@@ -45,7 +45,7 @@ jobs:
           path: ${{ steps.prepare.outputs.wwwroot-path }}
       # copy index.html to 404.html to serve the same file when a file is not found
       - name: copy index.html to 404.html
-        run: cp wwwroot/index.html wwwroot/404.html
+        run: cp release/wwwroot/index.html release/wwwroot/404.html
         
   # Deployment job
   deploy:
