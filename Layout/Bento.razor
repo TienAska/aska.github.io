@@ -1,9 +1,12 @@
+@inject HttpClient Http
+
 <div class="bento-grid">
     <div class="bento-box">
         @* <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
         </NavLink> *@
-        <tienyoung.github.io.Pages.Home />
+        <h1>About Me</h1>
+        My name is Tian Yang.
     </div>
     <div class="bento-box">
         <h1>Counter</h1>
@@ -22,14 +25,63 @@
         }
     </div>
     <div class="bento-box">
-@*         <NavLink class="nav-link" href="weather">
-            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-        </NavLink> *@
-        <tienyoung.github.io.Pages.Weather />
+        <h1>Weather</h1>
+
+        <p>This component demonstrates fetching data from the server.</p>
+
+        @if (forecasts == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Temp. (C)</th>
+                        <th>Temp. (F)</th>
+                        <th>Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var forecast in forecasts)
+                    {
+                        <tr>
+                            <td>@forecast.Date.ToShortDateString()</td>
+                            <td>@forecast.TemperatureC</td>
+                            <td>@forecast.TemperatureF</td>
+                            <td>@forecast.Summary</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        @code {
+            private WeatherForecast[]? forecasts;
+
+            protected override async Task OnInitializedAsync()
+            {
+                forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+            }
+
+            public class WeatherForecast
+            {
+                public DateOnly Date { get; set; }
+
+                public int TemperatureC { get; set; }
+
+                public string? Summary { get; set; }
+
+                public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+            }
+        }
+
     </div>
     <div class="bento-box">
-@*         <NavLink class="nav-link" href="bloglinks">
-            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> BlogLinks
+        @*         <NavLink class="nav-link" href="bloglinks">
+        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> BlogLinks
         </NavLink> *@
         <tienyoung.github.io.Pages.BlogLinks />
     </div>

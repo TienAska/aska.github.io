@@ -1,18 +1,32 @@
 ﻿.bento-grid {
-    /*background-color: yellow;*/
+    background-color: #f5f5f7;
     color: white;
-    padding: 2rem;
+    padding: 1rem;
     margin: 1rem;
     max-width: 1200px;
     display: grid;
     grid-auto-columns: 1fr;
-    gap: 5rem;
+    gap: 20px;
     grid-template-areas:
         'box1 box2'
         'box3 box4';
-    border-radius: 5rem;
+    border-radius: 4rem;
 }
 
     .bento-grid .bento-box {
-        color: blueviolet;
+        color: #4446bf;
+        background-color: white;
+        border-radius: 3rem;
+        padding: 5rem;
+        /*box-shadow: 7px 7px 12px rgb(0, 0, 0, .5), -7px -7px 12px rgb(255, 255, 255,.5);*/
     }
+
+@media (max-width: 920px){
+    .bento-grid {
+        grid-template-areas:
+            'box1'
+            'box2'
+            'box3'
+            'box4';
+    }
+}
