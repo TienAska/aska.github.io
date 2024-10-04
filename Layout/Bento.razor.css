@@ -1,0 +1,18 @@
+﻿.bento-grid {
+    /*background-color: yellow;*/
+    color: white;
+    padding: 2rem;
+    margin: 1rem;
+    max-width: 1200px;
+    display: grid;
+    grid-auto-columns: 1fr;
+    gap: 5rem;
+    grid-template-areas:
+        'box1 box2'
+        'box3 box4';
+    border-radius: 5rem;
+}
+
+    .bento-grid .bento-box {
+        color: blueviolet;
+    }
